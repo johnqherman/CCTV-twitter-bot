@@ -31,10 +31,6 @@ while True:
             print("camera_url is None")
             continue
 
-        city_country = soup.find('h1').text # find the city and country
-        city_country = city_country[11:] # remove the text before the city and country
-        city_country = city_country.strip() # remove the whitespace
-
         # test page validity
         print("checking page: " + url)
         if r.status_code == 200: # if the page is valid
@@ -44,7 +40,7 @@ while True:
             continue
 
         # test camera availability
-        if camera_url == "/static/no.jpg":
+        if camera_url == "/static/no.jpg": 
             print('camera found, camera feed unavailable.') 
             continue
         else:
@@ -95,7 +91,10 @@ while True:
             f.write(r.content)
 
         # post to twitter
+        city_country = soup.find('h1').text # find the city and country
+        city_country = city_country[11:].strip # pretty up the text
         tweet = city_country
+        print("posting to twitter...")
         try:
             api.update_status_with_media(status=tweet, filename=image_path) # post to twitter with image attached
         except tweepy.TweepError as e: # if the tweet fails, print the error and continue to the next iteration

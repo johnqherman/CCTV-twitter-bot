@@ -92,7 +92,13 @@ while True:
 
         # post to twitter
         city_country = soup.find('h1').text # find the city and country
-        city_country = city_country[11:].strip().replace(", Province Of", "").replace(", Republic Of", "") # pretty up text
+        city_country = city_country[11:] # pretty up text
+        .strip()
+        .replace(", Province Of", "")
+        .replace(", Republic Of", "")
+        .replace(", Islamic Republic", "")
+        .replace("n Federation", "")
+        
         tweet = city_country
         print("posting to twitter...")
         try:

@@ -98,8 +98,8 @@ while True:
         print("posting to twitter...")
         try:
             api.update_status_with_media(status=tweet, filename=image_path) # post to twitter with image attached
-        except tweepy.TweepyException as e: # if the tweet fails, print the error and continue to the next iteration
-            print(e.reason)
+        except tweepy.TweepyException: # if the tweet fails, print the error and continue to the next iteration
+            print("tweepy error.")
             continue
 
         print("tweet posted!")

@@ -51,6 +51,7 @@ while True:
         .strip()\
         .replace(", Province Of", "")\
         .replace(", Republic Of", "")\
+        .replace(", Islamic Republic", "")\
         .replace("n Federation", "")
 
     if city_country == "-, -" or city_country == "line camera":

@@ -6,7 +6,7 @@ import requests
 import tweepy
 from bs4 import BeautifulSoup
 
-# set up oauth and tweepy
+# set up twitter api
 with open('credentials.csv', 'r') as f:
     credentials = list(csv.reader(f))
     

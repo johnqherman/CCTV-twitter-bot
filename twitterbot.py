@@ -6,17 +6,12 @@ import requests
 import tweepy
 from bs4 import BeautifulSoup
 
-# authenticate with twitter (credentials.csv)
+# set up oauth and tweepy
 with open('credentials.csv', 'r') as f:
     credentials = list(csv.reader(f))
-    consumer_key = credentials[0][0]
-    consumer_secret = credentials[0][1]
-    access_token = credentials[0][2]
-    access_token_secret = credentials[0][3]
-
-# set up oauth and tweepy
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_token_secret)
+    
+auth = tweepy.OAuthHandler(credentials[0][0], credentials[0][1])
+auth.set_access_token(credentials[0][2], credentials[0][3])
 api = tweepy.API(auth)
 
 while True:

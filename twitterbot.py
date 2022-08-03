@@ -23,7 +23,7 @@ while True:
 
     # set up webscraping
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0'}
-    page = random.randint(1, 9999999)
+    page = random.randint(1, 999999)
     url = 'http://www.insecam.org/en/view/' + str(page)
     r = requests.get(url, headers=headers)
     html = r.text

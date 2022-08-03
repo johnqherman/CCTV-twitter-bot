@@ -79,12 +79,11 @@ while True:
     print("posting to twitter...")
     try:
         api.update_status_with_media(status=city_country, filename=image_path)
-        print("post successful.")
     except tweepy.TweepyException as e:
         print("post failed: " + str(e))
         continue
     
     # wait an hour and repeat
-    print("tweet posted; waiting an hour. gn")
+    print("post successful; waiting an hour. gn")
     time.sleep(3600)
     continue

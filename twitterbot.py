@@ -25,9 +25,13 @@ while True:
     soup = BeautifulSoup(html, 'html.parser')
     camera_url = soup.find('img')
 
+    if camera_url is None:
+        continue
+
+    camera_url = camera_url.get('src')
+
     # test page & camera validity
     if r.status_code == 200 \
-        and camera_url is not None \
         and camera_url != "/static/no.jpg" \
         and ".mjpg" not in camera_url \
         and "?action=stream" not in camera_url \
@@ -74,11 +78,12 @@ while True:
     print("posting to twitter...")
     try:
         api.update_status_with_media(status=city_country, filename=image_path)
+        print("post successful.")
     except tweepy.TweepyException as e:
         print("post failed: " + str(e))
         continue
     
     # wait an hour and repeat
-    print("post successful; waiting an hour. gn")
+    print("tweet posted; waiting an hour. gn")
     time.sleep(3600)
     continue

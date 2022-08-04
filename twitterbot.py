@@ -23,7 +23,7 @@ while True:
     r = requests.get(url, headers=headers)
     html = r.text
     soup = BeautifulSoup(html, 'html.parser')
-    camera_url = soup.find('img')['src']
+    camera_url = soup.find('img')
 
     # test page & camera validity
     if r.status_code == 200 \

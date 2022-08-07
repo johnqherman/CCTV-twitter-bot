@@ -32,7 +32,7 @@ while True:
         continue
 
     # test page & camera validity
-    camera_url = camera_url.get('src')
+    camera_url = camera_url.get('src').replace("?COUNTER", "")
 
     if camera_url != "/static/no.jpg" \
         and ".mjpg" not in camera_url \

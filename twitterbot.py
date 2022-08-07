@@ -6,41 +6,41 @@ import requests
 import tweepy
 from bs4 import BeautifulSoup
 
-# authenticate with twitter (credentials.csv)
-with open('credentials.csv', 'r') as f:
+# set up twitter api
+with open('data/credentials.csv', 'r') as f:
     credentials = list(csv.reader(f))
-    consumer_key = credentials[0][0]
-    consumer_secret = credentials[0][1]
-    access_token = credentials[0][2]
-    access_token_secret = credentials[0][3]
-
-# set up oauth and tweepy
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_token_secret)
-api = tweepy.API(auth)
+    auth = tweepy.OAuthHandler(credentials[0][0], credentials[0][1])
+    auth.set_access_token(credentials[0][2], credentials[0][3])
+    api = tweepy.API(auth)
 
 while True:
 
-    # set up webscraping
+    # open valid camera list
+    with open('data/cams.csv', 'r') as f:
+        cams = list(csv.reader(f))
+
+    # set up scraper
+    url = random.choice(cams)[0]
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0'}
-    page = random.randint(1, 999999)
-    url = 'http://www.insecam.org/en/view/' + str(page)
     r = requests.get(url, headers=headers)
     html = r.text
     soup = BeautifulSoup(html, 'html.parser')
-    camera_url = soup.find('img').get('src')
+    camera_url = soup.find('img')
+
+    if camera_url is None:
+        continue
 
     # test page & camera validity
-    if r.status_code == 200 \
-        and camera_url is not None \
-        and camera_url != "/static/no.jpg" \
+    camera_url = camera_url.get('src')
+
+    if camera_url != "/static/no.jpg" \
         and ".mjpg" not in camera_url \
         and "?action=stream" not in camera_url \
         and "wvhttp" not in camera_url \
         and ".cgi" not in camera_url \
         and "?stream" not in camera_url \
         and ".jpg" in camera_url:
-        print('camera captured: ' + url)
+        print('camera accepted: ' + url)
     else:
         print('camera rejected: ' + url)
         continue
@@ -51,39 +51,49 @@ while True:
         .strip()\
         .replace(", Province Of", "")\
         .replace(", Republic Of", "")\
+        .replace(", Islamic Republic", "")\
         .replace("n Federation", "")
 
-    if city_country == "-, -" or city_country == "line camera":
+    if city_country == "-, -" or city_country == "line camera" or city_country == "watch online":
         city_country = "Unknown Location"
 
     def get_state(city):
-        with open('uscities.csv', 'r') as csvfile:
+        with open('data/cities.csv', 'r') as csvfile:
             file = csv.reader(csvfile)
             for row in file:
                 if row[1] == city:
                     return row[3]
-
+                
     if "United States" in city_country:
         city = city_country[:city_country.find(",")].strip()
         state = get_state(city)
-        city_country = city + ", " + state + ", United States"
 
-    # save screenshot to screenshots folder
+        if state == "Georgia":
+            city_country = city + ", " + state + ", United States"
+        else:
+            city_country = city + ", " + state
+    
+    camera_id = ''.join(c for c in url if c.isdigit())
+    image_path = "screenshots/" + str(camera_id) + ".jpg"
     r = requests.get(camera_url, headers=headers)
-    image_path = "screenshots/" + str(page) + ".jpg"
+
     with open(image_path, 'wb') as f:
-        f.write(r.content)
+        try:
+            print("attempting to capture image: " + camera_url)
+            f.write(r.content)
+        except requests.exceptions.RequestException as e:
+            print(e)
+            continue
 
     # tweet the image
     print("posting to twitter...")
     try:
         api.update_status_with_media(status=city_country, filename=image_path)
-        print("post successful.")
     except tweepy.TweepyException as e:
         print("post failed: " + str(e))
         continue
     
     # wait an hour and repeat
-    print("tweet posted; waiting an hour. gn")
+    print("post successful; waiting an hour. gn")
     time.sleep(3600)
     continue

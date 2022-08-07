@@ -1,4 +1,5 @@
 import csv
+import os
 import random
 import time
 
@@ -76,6 +77,9 @@ while True:
     camera_id = ''.join(c for c in url if c.isdigit())
     image_path = "screenshots/" + str(camera_id) + "_" + str(int(time.time())) + ".jpg"
     r = requests.get(camera_url, headers=headers)
+
+    if not os.path.exists("screenshots"):
+        os.makedirs("screenshots")
 
     with open(image_path, 'wb') as f:
         try:

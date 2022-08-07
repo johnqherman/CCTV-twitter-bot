@@ -45,9 +45,6 @@ while True:
         print('camera rejected: ' + url)
         continue
 
-    if city_country == "-, -" or city_country == "line camera":
-        city_country = "Unknown Location"
-
     # city_country processing
     city_country = soup.find('h1')\
         .text[11:]\
@@ -55,6 +52,9 @@ while True:
         .replace(", Province Of", "")\
         .replace(", Republic Of", "")\
         .replace("n Federation", "")
+
+    if city_country == "-, -" or city_country == "line camera":
+        city_country = "Unknown Location"
 
     def get_state(city):
         with open('uscities.csv', 'r') as csvfile:
@@ -71,7 +71,6 @@ while True:
     # save screenshot to screenshots folder
     r = requests.get(camera_url, headers=headers)
     image_path = "screenshots/" + str(page) + ".jpg"
-    print("saving screenshot to " + image_path)
     with open(image_path, 'wb') as f:
         f.write(r.content)
 

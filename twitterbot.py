@@ -3,6 +3,7 @@ import os
 import random
 import time
 
+import emoji
 import requests
 import tweepy
 from bs4 import BeautifulSoup
@@ -16,7 +17,7 @@ with open('data/credentials.csv', 'r') as f:
 
 while True:
 
-    # open valid camera list
+    # get cameras from db
     with open('data/cams.csv', 'r') as f:
         cams = list(csv.reader(f))
 
@@ -31,7 +32,7 @@ while True:
     if camera_url is None:
         continue
 
-    # test page & camera validity
+    # test camera validity
     camera_url = camera_url.get('src').replace("?COUNTER", "")
 
     if camera_url != "/static/no.jpg" \
@@ -53,10 +54,13 @@ while True:
         .replace(", Province Of", "")\
         .replace(", Republic Of", "")\
         .replace(", Islamic Republic", "")\
-        .replace("n Federation", "")
+        .replace("n Federation", "")\
+        .replace("ian, State Of", "e")
 
-    if city_country == "-, -" or city_country == "line camera" or city_country == "watch online":
-        city_country = "Unknown Location"
+    if city_country == "-, -" \
+        or city_country == "line camera" \
+        or city_country == "watch online":
+            city_country = "Unknown Location"
 
     def get_state(city):
         with open('data/cities.csv', 'r') as csvfile:
@@ -64,6 +68,28 @@ while True:
             for row in file:
                 if row[1] == city:
                     return row[3]
+            return "Unknown State"
+
+    def get_flag(city_country):
+        with open('data/abbr.csv', 'r') as csvfile:
+            file = csv.reader(csvfile)
+            country = city_country.split(',')[1].strip()
+            for row in file:
+                if row[0] == country:
+                    return row[1].lower()
+            return "white"
+
+    if "United States" in city_country:
+        city = city_country[:city_country.find(",")].strip()
+        state = get_state(city)
+
+        if state == "Georgia":
+            city_country = city + ", " + state + ", United States"
+        else:
+            city_country = city + ", " + state
+
+    # create flag emoji for tweet
+    flag_emoji = emoji.emojize(':flag_' + get_flag(city_country) + ':')
                 
     if "United States" in city_country:
         city = city_country[:city_country.find(",")].strip()
@@ -86,13 +112,13 @@ while True:
             print("attempting to capture image: " + camera_url)
             f.write(r.content)
         except requests.exceptions.RequestException as e:
-            print(e)
+            print(str(e))
             continue
 
     # tweet the image
     print("posting to twitter...")
     try:
-        api.update_status_with_media(status=city_country, filename=image_path)
+        api.update_status_with_media(status=city_country + " " + flag_emoji, filename=image_path)
     except tweepy.TweepyException as e:
         print("post failed: " + str(e))
         continue

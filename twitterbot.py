@@ -3,7 +3,6 @@ import os
 import random
 import time
 
-import emoji
 import requests
 import tweepy
 from bs4 import BeautifulSoup
@@ -76,30 +75,52 @@ while True:
             country = city_country.split(',')[1].strip()
             for row in file:
                 if row[0] == country:
-                    return row[1].lower()
+                    return row[1]
             return "white"
 
-    if "United States" in city_country:
-        city = city_country[:city_country.find(",")].strip()
-        state = get_state(city)
-
-        if state == "Georgia":
-            city_country = city + ", " + state + ", United States"
-        else:
-            city_country = city + ", " + state
-
-    # create flag emoji for tweet
-    flag_emoji = emoji.emojize(':flag_' + get_flag(city_country) + ':')
-                
-    if "United States" in city_country:
-        city = city_country[:city_country.find(",")].strip()
-        state = get_state(city)
-
-        if state == "Georgia":
-            city_country = city + ", " + state + ", United States"
-        else:
-            city_country = city + ", " + state
+    # convert get_flag output to regional indicator symbols
+    flag = get_flag(city_country)
+    symbols = {
+            'A': '🇦',
+            'B': '🇧',
+            'C': '🇨',
+            'D': '🇩',
+            'E': '🇪',
+            'F': '🇫',
+            'G': '🇬',
+            'H': '🇭',
+            'I': '🇮',
+            'J': '🇯',
+            'K': '🇰',
+            'L': '🇱',
+            'M': '🇲',
+            'N': '🇳',
+            'O': '🇴',
+            'P': '🇵',
+            'Q': '🇶',
+            'R': '🇷',
+            'S': '🇸',
+            'T': '🇹',
+            'U': '🇺',
+            'V': '🇻',
+            'W': '🇼',
+            'X': '🇽',
+            'Y': '🇾',
+            'Z': '🇿'
+        }
     
+    for char, replacement in symbols.items():
+        flag = flag.replace(char, replacement)
+
+    if "United States" in city_country:
+        city = city_country[:city_country.find(",")].strip()
+        state = get_state(city)
+
+        if state == "Georgia":
+            city_country = city + ", " + state + ", United States"
+        else:
+            city_country = city + ", " + state
+
     camera_id = ''.join(c for c in url if c.isdigit())
     image_path = "screenshots/" + str(camera_id) + "_" + str(int(time.time())) + ".jpg"
     r = requests.get(camera_url, headers=headers)
@@ -117,13 +138,16 @@ while True:
 
     # tweet the image
     print("posting to twitter...")
+    status = city_country + " " + flag
+
     try:
-        api.update_status_with_media(status=city_country + " " + flag_emoji, filename=image_path)
+        api.update_status_with_media(status=status, filename=image_path)
+        print ("tweeted: " + status)
     except tweepy.TweepyException as e:
         print("post failed: " + str(e))
         continue
     
     # wait an hour and repeat
-    print("post successful; waiting an hour. gn")
+    print("waiting an hour. gn")
     time.sleep(3600)
     continue

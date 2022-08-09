@@ -76,7 +76,7 @@ while True:
             for row in file:
                 if row[0] == country:
                     return row[1]
-            return "white"
+            return "🏳"
 
     # convert get_flag output to regional indicator symbols
     flag = get_flag(city_country)

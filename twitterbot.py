@@ -72,11 +72,16 @@ while True:
     def get_flag(city_country):
         with open('data/abbr.csv', 'r') as csvfile:
             file = csv.reader(csvfile)
+
+            if "," not in city_country:
+                country = city_country
+
             country = city_country.split(',')[1].strip()
+            
             for row in file:
                 if row[0] == country:
                     return row[1]
-            return "white"
+            return "🏳"
 
     # convert get_flag output to regional indicator symbols
     flag = get_flag(city_country)
@@ -138,7 +143,10 @@ while True:
 
     # tweet the image
     print("posting to twitter...")
+
     status = city_country + " " + flag
+    if city_country == "Unknown Location":
+            status = city_country
 
     try:
         api.update_status_with_media(status=status, filename=image_path)

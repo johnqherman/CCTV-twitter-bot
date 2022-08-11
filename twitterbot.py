@@ -72,19 +72,15 @@ while True:
     def get_flag(city_country):
         with open('data/abbr.csv', 'r') as csvfile:
             file = csv.reader(csvfile)
-
-            if "," not in city_country:
+            if "," in city_country:
+                country = city_country.split(',')[1].strip()
+            else:
                 country = city_country
-
-            country = city_country.split(',')[1].strip()
-            
             for row in file:
                 if row[0] == country:
                     return row[1]
             return "🏳"
 
-    # convert get_flag output to regional indicator symbols
-    flag = get_flag(city_country)
     symbols = {
             'A': '🇦',
             'B': '🇧',
@@ -113,26 +109,28 @@ while True:
             'Y': '🇾',
             'Z': '🇿'
         }
-    
+
+    flag = get_flag(city_country)
     for char, replacement in symbols.items():
         flag = flag.replace(char, replacement)
 
     if "United States" in city_country:
         city = city_country[:city_country.find(",")].strip()
         state = get_state(city)
-
         if state == "Georgia":
             city_country = city + ", " + state + ", United States"
         else:
             city_country = city + ", " + state
 
+    r = requests.get(camera_url, headers=headers)
     camera_id = ''.join(c for c in url if c.isdigit())
     image_path = "screenshots/" + str(camera_id) + "_" + str(int(time.time())) + ".jpg"
-    r = requests.get(camera_url, headers=headers)
+    status = city_country + " " + flag if city_country != "Unknown Location" else city_country
 
     if not os.path.exists("screenshots"):
         os.makedirs("screenshots")
 
+    # save image
     with open(image_path, 'wb') as f:
         try:
             print("attempting to capture image: " + camera_url)
@@ -141,16 +139,10 @@ while True:
             print(str(e))
             continue
 
-    # tweet the image
+    # post to twitter
     print("posting to twitter...")
-
-    status = city_country + " " + flag
-    if city_country == "Unknown Location":
-            status = city_country
-
     try:
         api.update_status_with_media(status=status, filename=image_path)
-        print ("tweeted: " + status)
     except tweepy.TweepyException as e:
         print("post failed: " + str(e))
         continue

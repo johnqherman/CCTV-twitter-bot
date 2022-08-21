@@ -135,8 +135,8 @@ while True:
         try:
             print("attempting to capture image: " + camera_url)
             f.write(r.content)
-        except requests.exceptions.RequestException as e:
-            print(str(e))
+        except Exception as e:
+            print("error: " + str(e))
             continue
 
     # post to twitter

@@ -22,7 +22,7 @@ while True:
 
     # set up scraper
     url = random.choice(cams)[0]
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0'}
+    headers = {'User-Agent': 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.1.6) Gecko/20070802 SeaMonkey/1.1.4'}
     r = requests.get(url, headers=headers)
     html = r.text
     soup = BeautifulSoup(html, 'html.parser')
@@ -135,7 +135,7 @@ while True:
         try:
             print("attempting to capture image: " + camera_url)
             f.write(r.content)
-        except Exception as e:
+        except(ConnectionError, TimeoutError, OSError) as e:
             print("error: " + str(e))
             continue
 

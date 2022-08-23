@@ -122,14 +122,13 @@ while True:
         else:
             city_country = city + ", " + state
 
-    camera_id = ''.join(c for c in url if c.isdigit())
-    image_path = "screenshots/" + str(camera_id) + "_" + str(int(time.time())) + ".jpg"
-    status = city_country + " " + flag if city_country != "Unknown Location" else city_country
-
+    # save image
     if not os.path.exists("screenshots"):
         os.makedirs("screenshots")
 
-    # save image
+    camera_id = ''.join(c for c in url if c.isdigit())
+    image_path = "screenshots/" + str(camera_id) + "_" + str(int(time.time())) + ".jpg"
+
     with open(image_path, 'wb') as f:
         try:
             print("attempting to capture image: " + camera_url)
@@ -140,8 +139,9 @@ while True:
             continue
 
     # post to twitter
-    print("posting to twitter...")
+    status = city_country + " " + flag if city_country != "Unknown Location" else city_country
     try:
+        print("posting to twitter...")
         api.update_status_with_media(status=status, filename=image_path)
     except tweepy.TweepyException as e:
         print("post failed: " + str(e))

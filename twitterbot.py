@@ -122,7 +122,6 @@ while True:
         else:
             city_country = city + ", " + state
 
-    r = requests.get(camera_url, headers=headers)
     camera_id = ''.join(c for c in url if c.isdigit())
     image_path = "screenshots/" + str(camera_id) + "_" + str(int(time.time())) + ".jpg"
     status = city_country + " " + flag if city_country != "Unknown Location" else city_country
@@ -134,6 +133,7 @@ while True:
     with open(image_path, 'wb') as f:
         try:
             print("attempting to capture image: " + camera_url)
+            r = requests.get(camera_url, headers=headers)
             f.write(r.content)
         except(ConnectionError, TimeoutError, OSError) as e:
             print("error: " + str(e))

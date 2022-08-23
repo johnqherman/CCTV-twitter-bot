@@ -133,7 +133,7 @@ while True:
     with open(image_path, 'wb') as f:
         try:
             print("attempting to capture image: " + camera_url)
-            r = requests.get(camera_url, headers=headers)
+            r = requests.get(camera_url, headers=headers, timeout=5)
             f.write(r.content)
         except(ConnectionError, TimeoutError, OSError) as e:
             print("error: " + str(e))

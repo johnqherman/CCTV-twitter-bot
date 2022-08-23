@@ -125,10 +125,8 @@ while True:
     # save image
     if not os.path.exists("screenshots"):
         os.makedirs("screenshots")
-
     camera_id = ''.join(c for c in url if c.isdigit())
     image_path = "screenshots/" + str(camera_id) + "_" + str(int(time.time())) + ".jpg"
-
     with open(image_path, 'wb') as f:
         try:
             print("attempting to capture image: " + camera_url)

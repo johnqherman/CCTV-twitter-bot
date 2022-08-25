@@ -135,6 +135,10 @@ while True:
         except(ConnectionError, TimeoutError, OSError) as e:
             print("error: " + str(e))
             continue
+    if os.stat(image_path).st_size == 0:
+        print("image is empty")
+        os.remove(image_path)
+        continue
 
     # post to twitter
     status = city_country + " " + flag if city_country != "Unknown Location" else city_country
@@ -146,6 +150,6 @@ while True:
         continue
     
     # wait an hour and repeat
-    print("waiting an hour. gn")
+    print("post successful, " + status + "\n" + "waiting an hour...")
     time.sleep(3600)
     continue

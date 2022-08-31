@@ -145,7 +145,7 @@ while True:
         continue
 
     # delete image, wait an hour, and repeat
-    print("post successful: https://twitter.com/Unsecured_CCTV/status/" + str(api.user_timeline(count=1)[0].id) + "/\n" + "waiting an hour...")
+    print("post successful: https://twitter.com/Unsecured_CCTV/status/" + str(api.user_timeline(count=1)[0].id) + "\n" + "waiting an hour...")
     os.remove(image_path)
     time.sleep(3600)
     continue

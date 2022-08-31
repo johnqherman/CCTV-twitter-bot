@@ -27,6 +27,4 @@ You can see the bot in action [here on its Twitter page](https://twitter.com/Uns
 # 
 ## Citations
 
-`cities.csv` taken from [Simplemaps.com](https://simplemaps.com/data/us-cities)
-
 `cams.csv` generated from [Insecam.org](http://www.insecam.org/static/sitemap.xml)

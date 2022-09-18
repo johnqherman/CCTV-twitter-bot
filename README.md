@@ -1,5 +1,5 @@
 # Unsecured CCTV cameras bot
-A Python bot that crawls random unsecured CCTV cameras and posts them to a Twitter account.
+A Python bot that scrapes random unsecured CCTV cameras and posts them to a Twitter account.
 
 You can see the bot in action [here on its Twitter page](https://twitter.com/Unsecured_CCTV)
 

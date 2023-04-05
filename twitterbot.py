@@ -1,4 +1,3 @@
-import csv
 import os
 import random
 import time
@@ -9,10 +8,8 @@ import tweepy
 from lxml import etree, html
 from requests.exceptions import ReadTimeout, RequestException, Timeout
 
-
-def load_credentials():
-    with open('credentials.csv', 'r') as f:
-        return list(csv.reader(f))
+from credentials import (ACCESS_TOKEN, ACCESS_TOKEN_SECRET, CONSUMER_KEY,
+                         CONSUMER_SECRET)
 
 
 def load_cameras():
@@ -26,7 +23,6 @@ def load_cameras():
     else:
         print("failed to fetch camera links.")
         return None
-
     return camera_links
 
 
@@ -180,9 +176,8 @@ def post_to_twitter(api, status, image_path):
 def main():
 
     # twitter credentials
-    credentials = load_credentials()
-    auth = tweepy.OAuthHandler(credentials[0][0], credentials[0][1])
-    auth.set_access_token(credentials[0][2], credentials[0][3])
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
     api = tweepy.API(auth)
 
     headers = {

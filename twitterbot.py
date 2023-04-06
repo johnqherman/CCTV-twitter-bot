@@ -69,10 +69,55 @@ class Camera:
         }
         return camera_info
 
-    def is_valid(self):
-        return (self.stream_url != "/static/no.jpg"
-                and "?stream" not in self.stream_url
-                and ".jpg" in self.stream_url)
+    def _save_image(self, image_file_path, camera_url, request_headers, retries=RETRIES):
+        for attempt in range(1, retries + 1):
+            try:
+                r = requests.get(
+                    camera_url, headers=request_headers, timeout=10)
+                if r.status_code == 200:
+                    with open(image_file_path, 'wb') as f:
+                        f.write(r.content)
+                    return True
+            except (RequestException, ReadTimeout) as e:
+                logger.error(f"error saving image: {e}")
+                if attempt < retries:
+                    logger.info(f"retrying... (attempt {attempt + 1})")
+                else:
+                    logger.error(
+                        "failed to save image after multiple attempts.")
+                    return False
+        return False
+
+    def _image_is_solid_color(self, image_file_path):
+        image = cv2.imread(image_file_path)
+
+        if image is None:
+            logging.error("image is empty. skipping...")
+            os.remove(image_file_path)
+            return True
+
+        standard_deviation = np.std(image)
+
+        if standard_deviation == 0:
+            logging.info("image consists of a single color. skipping...")
+            os.remove(image_file_path)
+            return True
+
+        return False
+
+    def _url_is_valid(self):
+        return all([
+            self.stream_url != "/static/no.jpg",
+            "?stream" not in self.stream_url,
+            ".jpg" in self.stream_url,
+        ])
+
+    def save_and_validate_image(self, image_file_path, request_headers, retries=RETRIES):
+        saved_successfully = self._save_image(
+            image_file_path, request_headers, retries)
+        if saved_successfully and not self._image_is_solid_color(image_file_path):
+            return True
+        return False
 
 
 def authenticate_twitter():
@@ -104,48 +149,12 @@ def get_random_valid_camera(available_cameras):
     while True:
         random_camera_url = random.choice(available_cameras)
         camera = Camera(random_camera_url)
-        if not camera.page_content or not camera.stream_url or not camera.is_valid():
+        if not camera.page_content or not camera.stream_url or not camera._url_is_valid():
             logger.info(f'camera rejected: {camera.id}')
             continue
 
         logger.info(f'camera accepted: {camera.id}')
         return camera
-
-
-def save_image(image_file_path, camera_url, request_headers, retries=RETRIES):
-    for attempt in range(1, retries + 1):
-        try:
-            r = requests.get(camera_url, headers=request_headers, timeout=10)
-            if r.status_code == 200:
-                with open(image_file_path, 'wb') as f:
-                    f.write(r.content)
-                return True
-        except (RequestException, ReadTimeout) as e:
-            logger.error(f"error saving image: {e}")
-            if attempt < retries:
-                logger.info(f"retrying... (attempt {attempt + 1})")
-            else:
-                logger.error("failed to save image after multiple attempts.")
-                return False
-    return False
-
-
-def image_is_solid_color(image_file_path):
-    image = cv2.imread(image_file_path)
-
-    if image is None:
-        logging.error("image is empty. skipping...")
-        os.remove(image_file_path)
-        return True
-
-    standard_deviation = np.std(image)
-
-    if standard_deviation == 0:
-        logging.info("image consists of a single color. skipping...")
-        os.remove(image_file_path)
-        return True
-
-    return False
 
 
 def create_tweet_text(camera_info, flag):
@@ -220,23 +229,20 @@ def post_to_twitter(twitter_api, tweet_status, image_file_path):
 
 
 def main():
-    if not os.path.exists('images'):
-        os.makedirs('images')
+    try:
+        os.makedirs('images', exist_ok=True)
+    except OSError as e:
+        logger.error(f"Error creating the 'images' folder: {e}")
+        return
 
     twitter_api = authenticate_twitter()
     available_cameras = load_cameras()
 
     while True:
         camera = get_random_valid_camera(available_cameras)
-
         image_file_path = f"images/{camera.id}_{int(time.time())}.jpg"
-        saved_successfully = save_image(
-            image_file_path, camera.stream_url, REQUEST_HEADERS)
 
-        if not saved_successfully:
-            continue
-
-        if image_is_solid_color(image_file_path):
+        if not camera.save_and_validate_image(image_file_path, REQUEST_HEADERS):
             continue
 
         tweet_status = create_tweet_text(

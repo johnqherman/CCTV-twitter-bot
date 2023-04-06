@@ -4,7 +4,7 @@ A Python bot that scrapes random unsecured CCTV cameras and posts them to a Twit
 
 You can see the bot in action [here on its Twitter page](https://twitter.com/Unsecured_CCTV).
 
-<img src="https://user-images.githubusercontent.com/95893344/229968711-b8198a32-d031-4f5b-acc3-d69823556f51.png" alt="West Des Moines, Iowa" width="400"/> <img src="https://user-images.githubusercontent.com/95893344/229968930-2830ccb5-4cf6-493a-83d8-037cd353add0.png" alt="Trento, Italy" width="490"/>
+<img src="https://user-images.githubusercontent.com/95893344/229968711-b8198a32-d031-4f5b-acc3-d69823556f51.png" alt="West Des Moines, Iowa" width="400"/> <img src="https://user-images.githubusercontent.com/95893344/229968930-2830ccb5-4cf6-493a-83d8-037cd353add0.png" alt="Trento, Italy" width="400"/>
 
 ## 🚀 Usage
 

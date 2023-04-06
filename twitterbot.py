@@ -151,7 +151,12 @@ def image_is_solid_color(image_file_path):
 def create_tweet_text(camera_info, flag):
     city = camera_info['city'] if camera_info['city'] != "-" else "Unknown"
     region = camera_info['region'] if camera_info['region'] != "-" else "Unknown"
-    country = camera_info['country'] if camera_info['country'] != "-" else "Unknown"
+    country = camera_info['country']\
+        .replace(", Province Of", "")\
+        .replace(", Republic Of", "")\
+        .replace(", Islamic Republic", "")\
+        .replace("n Federation", "")\
+        .replace("ian, State Of", "e") if camera_info['country'] != "-" else "Unknown"
 
     if country == "United States":
         location = city + ", " + region

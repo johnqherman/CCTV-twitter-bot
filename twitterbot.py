@@ -215,6 +215,9 @@ def post_to_twitter(twitter_api, tweet_status, image_file_path):
 
 
 def main():
+    if not os.path.exists('images'):
+        os.makedirs('images')
+
     twitter_api = authenticate_twitter()
     available_cameras = load_cameras()
 

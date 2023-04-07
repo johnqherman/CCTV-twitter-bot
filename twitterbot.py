@@ -248,8 +248,9 @@ def post_to_twitter(twitter_api, tweet_status, image_file_path):
         logger.info("posting to twitter...")
         twitter_api.update_status_with_media(
             status=tweet_status, filename=image_file_path)
+        bot_username = twitter_api.me().screen_name
         latest_tweet_id = twitter_api.user_timeline(count=1)[0].id
-        tweet_url = f"https://twitter.com/Unsecured_CCTV/status/{latest_tweet_id}"
+        tweet_url = f"https://twitter.com/{bot_username}/status/{latest_tweet_id}"
         logger.info(f"post successful: {tweet_url}")
         return True
     except tweepy.TweepError as e:

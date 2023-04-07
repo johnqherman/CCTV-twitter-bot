@@ -52,6 +52,13 @@ class Camera:
         camera_url = self.page_tree.xpath('//img/@src')
         return camera_url[0].replace("?COUNTER", "") if camera_url else None
 
+    def _url_is_valid(self):
+        return all([
+            self.stream_url != "/static/no.jpg",
+            "?stream" not in self.stream_url,
+            ".jpg" in self.stream_url,
+        ])
+
     def _get_camera_details(self):
         details = self.page_tree.xpath('//div[@class="camera-details"]')
         details_array = [detail.text_content() for detail in details]
@@ -105,12 +112,6 @@ class Camera:
 
         return False
 
-    def _url_is_valid(self):
-        return all([
-            self.stream_url != "/static/no.jpg",
-            "?stream" not in self.stream_url,
-            ".jpg" in self.stream_url,
-        ])
 
     def save_and_validate_image(self, image_file_path, request_headers, retries=RETRIES):
         saved_successfully = self._save_image(

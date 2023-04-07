@@ -112,7 +112,6 @@ class Camera:
 
         return False
 
-
     def save_and_validate_image(self, image_file_path, request_headers, retries=RETRIES):
         saved_successfully = self._save_image(
             image_file_path, self.stream_url, request_headers, retries)

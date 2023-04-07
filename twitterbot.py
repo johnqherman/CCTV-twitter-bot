@@ -128,7 +128,7 @@ def authenticate_twitter():
 
 
 def load_cameras(retries=RETRIES):
-    for attempt in range(retries):
+    for attempt in range(1, retries + 1):
         r = requests.get(SITEMAP_URL)
 
         if r.status_code == 200:
@@ -140,7 +140,7 @@ def load_cameras(retries=RETRIES):
         else:
             error_msg = "failed to fetch camera links after multiple attempts."
             logger.error(error_msg)
-            if attempt < retries - 1:
+            if attempt < retries:
                 logger.info(f"retrying... (attempt {attempt + 1})")
             else:
                 raise FetchCamerasError(error_msg)
@@ -233,7 +233,7 @@ def main():
     try:
         os.makedirs('images', exist_ok=True)
     except OSError as e:
-        logger.error(f"Error creating the 'images' folder: {e}")
+        logger.error(f"error creating 'images' folder: {e}")
         return
 
     twitter_api = authenticate_twitter()

@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import time
+from typing import Dict, List, Optional
 
 import cv2
 import numpy as np
@@ -21,17 +22,17 @@ logger = logging.getLogger(__name__)
 class FetchCamerasError(Exception):
     """Custom exception class for handling errors when fetching camera links."""
 
-    def __init__(self, message):
+    def __init__(self, message: str):
         self.message = message
 
-    def __str__(self):
+    def __str__(self) -> str:
         return repr(self.message)
 
 
 class Camera:
     """Camera class to handle camera-related operations."""
 
-    def __init__(self, url):
+    def __init__(self, url: str):
         self.url = url
         self.id = self._get_camera_id()
         self.page_content = self._get_camera_page(REQUEST_HEADERS)
@@ -41,11 +42,11 @@ class Camera:
         self.details = self._get_camera_details() if self.page_tree is not None else None
         self.info = self._parse_camera_details() if self.details is not None else None
 
-    def _get_camera_id(self):
+    def _get_camera_id(self) -> str:
         """Extracts the camera ID from the URL."""
         return ''.join(char for char in self.url if char.isdigit())
 
-    def _get_camera_page(self, request_headers):
+    def _get_camera_page(self, request_headers: Dict[str, str]) -> Optional[bytes]:
         """Fetches the camera page content."""
         try:
             r = requests.get(self.url, headers=request_headers)
@@ -54,12 +55,12 @@ class Camera:
             logger.error("error capturing image: " + str(e))
             return None
 
-    def _find_camera_url(self):
+    def _find_camera_url(self) -> Optional[str]:
         """Finds the camera stream URL."""
         camera_url = self.page_tree.xpath('//img/@src')
         return camera_url[0].replace("?COUNTER", "") if camera_url else None
 
-    def _url_is_valid(self):
+    def _url_is_valid(self) -> bool:
         """Checks if the stream URL is valid."""
         return all([
             self.stream_url != "/static/no.jpg",
@@ -67,7 +68,7 @@ class Camera:
             ".jpg" in self.stream_url,
         ])
 
-    def _get_camera_details(self):
+    def _get_camera_details(self) -> Optional[str]:
         """Extracts the camera details."""
         details = self.page_tree.xpath('//div[@class="camera-details"]')
         details_array = [detail.text_content() for detail in details]
@@ -75,7 +76,7 @@ class Camera:
             '\t', '').strip() for detail in details_array)
         return details
 
-    def _parse_camera_details(self):
+    def _parse_camera_details(self) -> Optional[Dict[str, str]]:
         """Parses the camera details and returns the camera info as a dictionary."""
         details = self.details
         camera_info = {
@@ -86,7 +87,7 @@ class Camera:
         }
         return camera_info
 
-    def _save_image(self, image_file_path, camera_url, request_headers, retries=RETRIES):
+    def _save_image(self, image_file_path: str, camera_url: str, request_headers: Dict[str, str], retries: int = RETRIES) -> bool:
         """Saves the image from the camera stream URL."""
         for attempt in range(1, retries + 1):
             try:
@@ -106,7 +107,7 @@ class Camera:
                     return False
         return False
 
-    def _image_is_solid_color(self, image_file_path):
+    def _image_is_solid_color(self, image_file_path: str) -> bool:
         """Checks if the image consists of a single color."""
         image = cv2.imread(image_file_path)
 
@@ -122,7 +123,7 @@ class Camera:
 
         return False
 
-    def save_and_validate_image(self, image_file_path, request_headers, retries=RETRIES):
+    def save_and_validate_image(self, image_file_path: str, request_headers: Dict[str, str], retries: int = RETRIES) -> bool:
         """
         Saves the image and validates that it is not a solid color.
         Returns True if the image is saved and validated, False otherwise.
@@ -140,14 +141,14 @@ class Camera:
             return False
 
 
-def authenticate_twitter():
+def authenticate_twitter() -> tweepy.API:
     """Authenticates with the Twitter API and returns a tweepy.API instance."""
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
     return tweepy.API(auth)
 
 
-def load_cameras(retries=RETRIES):
+def load_cameras(retries: int = RETRIES) -> List[str]:
     """Fetches the camera links and returns them as a list."""
     for attempt in range(1, retries + 1):
         r = requests.get(SITEMAP_URL)
@@ -167,7 +168,7 @@ def load_cameras(retries=RETRIES):
                 raise FetchCamerasError(error_msg)
 
 
-def get_random_valid_camera(available_cameras):
+def get_random_valid_camera(available_cameras: List[str]) -> Camera:
     """Returns a random valid Camera object."""
     while True:
         random_camera_url = random.choice(available_cameras)
@@ -180,7 +181,7 @@ def get_random_valid_camera(available_cameras):
         return camera
 
 
-def create_tweet_text(camera_info, flag):
+def create_tweet_text(camera_info: Dict[str, str], flag: str) -> str:
     """Generates a tweet text based on the camera information and flag."""
     city = camera_info['city'] if camera_info['city'] != "-" else "Unknown"
     region = camera_info['region'] if camera_info['region'] != "-" else "Unknown"
@@ -206,7 +207,7 @@ def create_tweet_text(camera_info, flag):
         return location + " " + flag
 
 
-def assemble_flag_emoji(country_code):
+def assemble_flag_emoji(country_code: str) -> str:
     """Converts a country code into a flag emoji."""
     symbols = {
         'A': '🇦',
@@ -239,7 +240,7 @@ def assemble_flag_emoji(country_code):
     return "".join(symbols.get(char, char) for char in country_code)
 
 
-def post_to_twitter(twitter_api, tweet_status, image_file_path):
+def post_to_twitter(twitter_api: tweepy.API, tweet_status: str, image_file_path: str) -> bool:
     """
     Posts a tweet with an image to Twitter.
     Returns True if the post is successful, False otherwise.
@@ -258,7 +259,7 @@ def post_to_twitter(twitter_api, tweet_status, image_file_path):
         return False
 
 
-def main():
+def main() -> None:
     """
     The main function that runs the script. It authenticates with Twitter,
     fetches camera links, and posts images with their locations to Twitter.

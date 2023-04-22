@@ -1,3 +1,4 @@
 credentials.py
-images/
 __pycache__/
+prod.env
+.mypy_cache/

@@ -4,9 +4,14 @@ import time
 import constants as c
 import settings as s
 from camera import Camera
-from utils import (assemble_flag_emoji, authenticate_twitter,
-                   create_tweet_text, get_random_valid_camera, load_cameras,
-                   post_to_twitter)
+from utils import (
+    assemble_flag_emoji,
+    authenticate_twitter,
+    create_tweet_text,
+    get_random_valid_camera,
+    load_cameras,
+    post_to_twitter,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -31,7 +36,7 @@ def main() -> None:
 
         if camera.info is not None:
             tweet_status = create_tweet_text(
-                camera.info, assemble_flag_emoji(country_code=camera.info["country_code"])
+                camera.info, assemble_flag_emoji(country_code=camera.info["Country code"])
             )
 
         tweet_posted_successfully = post_to_twitter(

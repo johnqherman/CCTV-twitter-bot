@@ -3,61 +3,81 @@ import sys
 from typing import Dict
 
 import pytest
+from test_constants import DETAILS_GERMANY, DETAILS_JAPAN, DETAILS_TURKEY
+
+from utils import assemble_flag_emoji, create_tweet_text, replace_substrings
 
 src_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-
 sys.path.append(src_directory)
 
 from camera import Camera  # noqa: E402
 
 
-@pytest.fixture
-def sample_class():
-    return Camera()
+class TestCamera:
+    @pytest.fixture
+    def sample_class(self):
+        return Camera()
 
+    @pytest.mark.parametrize(
+        "camera_info, flag, expected_output",
+        [
+            ({"city": "New York", "region": "New York", "country": "United States"}, "🇺🇸", "New York, NY 🇺🇸"),
+            ({"city": "Toronto", "region": "Ontario", "country": "Canada"}, "🇨🇦", "Toronto, Ontario, Canada 🇨🇦"),
+            ({"city": "Berlin", "region": "Berlin", "country": "Germany"}, "🇩🇪", "Berlin, Germany 🇩🇪"),
+            ({"city": "-", "region": "Texas", "country": "United States"}, "🇺🇸", "Unknown, Texas 🇺🇸"),
+            ({"city": "Unknown", "region": "Unknown", "country": "United States"}, "🇺🇸", "Unknown, United States 🇺🇸"),
+            ({"city": "-", "region": "-", "country": "-"}, "", "Unknown Location"),
+            ({"city": "Unknown", "region": "Unknown", "country": "Canada"}, "🇨🇦", "Unknown Location"),
+        ],
+    )
+    def test_create_tweet_text_formats_correctly(self, camera_info, flag, expected_output):
+        """Test whether the create_tweet_text function formats the string correctly."""
+        assert create_tweet_text(camera_info, flag) == expected_output
 
-@pytest.mark.parametrize(
-    "details, expected_output",
-    [
-        (
-            "\n\t\n\t\t\n\t\t\tCountry:\n\t\t\n\t\t\n\t\t\tJapan\n\t\t\n\t\n\t\n\t\t\n\t\t\tCountry code:\n\t\t\n\t\t\n\t\t\tJP\n\t\t\n\t\n\t\n\t\t\n\t\t\tRegion:\n\t\t\n\t\t\n\t\t\tWakayama\n\t\t\n\t\n\t\n\t\t\n\t\t\tCity:\n\t\t\n\t\t\n\t\t\t Tanabe\n\t\t\n\t\n\t\n\t\t\n\t\t\tLatitude:\n\t\t\n\t\t\n\t\t\t33.733000\n\t\t\n\t\n\t\n\t\t\n\t\t\tLongitude:\n\t\t\n\t\t\n\t\t\t135.383000\n\t\t\n\t\n\t\n\t\t\n\t\t\tZIP:\n\t\t\n\t\t\n\t\t\t646-0021\n\t\t\n\t\n\t\n\t\t\n\t\t\tTimezone:\n\t\t\n\t\t\n\t\t\t+09:00 \n\t\t\n\t\n\t\n\t\t\n\t\t\tManufacturer:\n\t\t\n\t\t\n\t\t\tCanon\n\t\t\n\t\n",  # noqa: E501
-            {
-                "city": " Tanabe",
-                "region": "Wakayama",
-                "country": "Japan",
-                "country_code": "JP",
-            },
-        ),
-        (
-            "\n\t\n\t\t\n\t\t\tCountry:\n\t\t\n\t\t\n\t\t\tGermany\n\t\t\n\t\n\t\n\t\t\n\t\t\tCountry code:\n\t\t\n\t\t\n\t\t\tDE\n\t\t\n\t\n\t\n\t\t\n\t\t\tRegion:\n\t\t\n\t\t\n\t\t\tBayern\n\t\t\n\t\n\t\n\t\t\n\t\t\tCity:\n\t\t\n\t\t\n\t\t\t Deggendorf\n\t\t\n\t\n\t\n\t\t\n\t\t\tLatitude:\n\t\t\n\t\t\n\t\t\t48.840860\n\t\t\n\t\n\t\n\t\t\n\t\t\tLongitude:\n\t\t\n\t\t\n\t\t\t12.960680\n\t\t\n\t\n\t\n\t\t\n\t\t\tZIP:\n\t\t\n\t\t\n\t\t\t94469\n\t\t\n\t\n\t\n\t\t\n\t\t\tTimezone:\n\t\t\n\t\t\n\t\t\t+01:00 \n\t\t\n\t\n\t\n\t\t\n\t\t\tManufacturer:\n\t\t\n\t\t\n\t\t\tMobotix\n\t\t\n\t\n",  # noqa: E501
-            {
-                "city": " Deggendorf",
-                "region": "Bayern",
-                "country": "Germany",
-                "country_code": "DE",
-            },
-        ),
-        (
-            "\n\t\n\t\t\n\t\t\tCountry:\n\t\t\n\t\t\n\t\t\tTurkey\n\t\t\n\t\n\t\n\t\t\n\t\t\tCountry code:\n\t\t\n\t\n\t\t\n\t\t\tTR\n\t\t\n\t\n\t\n\t\t\n\t\t\tRegion:\n\t\t\n\t\t\n\t\t\tAnkara\n\t\t\n\t\n\t\n\t\t\n\t\t\tCity:\n\t\t\n\t\t\n\t\t\t Ankara\n\t\t\n\t\n\t\n\t\t\n\t\t\tLatitude:\n\t\t\n\t\t\n\t\t\t39.919870\n\t\t\n\t\n\t\n\t\t\n\t\t\tLongitude:\n\t\t\n\t\t\n\t\t\t32.854270\n\t\t\n\t\n\t\n\t\t\n\t\t\tZIP:\n\t\t\n\t\t\n\t\t\t06530\n\t\t\n\t\n\t\n\t\t\n\t\t\tTimezone:\n\t\t\n\t\t\n\t\t\t+03:00 \n\t\t\n\t\n\t\n\t\t\n\t\t\tManufacturer:\n\t\t\n\t\t\n\t\t\tAxis\n\t\t\n\t\n",  # noqa: E501
-            {
-                "city": " Ankara",
-                "region": "Ankara",
-                "country": "Turkey",
-                "country_code": "TR",
-            },
-        ),
-    ],
-)
-def test_parse_camera_details(sample_class: Camera, details: str, expected_output: Dict[str, str]) -> None:
-    sample_class.details = details
-    assert sample_class._parse_camera_details() == expected_output
+    @pytest.mark.parametrize(
+        "country_code, expected_flag_emoji",
+        [
+            ("US", "🇺🇸"),
+            ("CA", "🇨🇦"),
+            ("DE", "🇩🇪"),
+            ("", ""),
+            (None, ""),
+        ],
+    )
+    def test_assemble_flag_emoji_generates_correct_emoji(self, country_code, expected_flag_emoji):
+        """Test whether the assemble_flag_emoji function generates the correct emoji for each country code."""
+        assert assemble_flag_emoji(country_code) == expected_flag_emoji
 
+    def test_replace_substrings_removes_all_occurrences(self):
+        """Test whether the replace_substrings function correctly removes all occurrences of specified substrings."""
+        test_string = "H1E2L3L4O5 W6O7R8L9D0"
+        mappings = {str(i): "" for i in range(10)}
+        expected_output = "HELLO WORLD"
+        assert replace_substrings(test_string, mappings) == expected_output
 
-def test_parse_camera_details_no_details(sample_class: Camera) -> None:
-    sample_class.details = None
-    assert sample_class._parse_camera_details() is None
+    @pytest.mark.parametrize(
+        "details, expected_output",
+        [
+            (DETAILS_JAPAN, {"city": " Tanabe", "region": "Wakayama", "country": "Japan", "country_code": "JP"}),
+            (DETAILS_GERMANY, {"city": " Deggendorf", "region": "Bayern", "country": "Germany", "country_code": "DE"}),
+            (DETAILS_TURKEY, {"city": " Ankara", "region": "Ankara", "country": "Turkey", "country_code": "TR"}),
+        ],
+    )
+    def test_parse_camera_details_returns_correct_output(
+        self, mocker, sample_class: Camera, details: str, expected_output: Dict[str, str]
+    ) -> None:
+        """Test whether the _parse_camera_details function returns the correct output."""
+        sample_class.details = details
+        spy = mocker.spy(sample_class, "_parse_camera_details")
+        assert sample_class._parse_camera_details() == expected_output
+        spy.assert_called_once()
 
+    def test_parse_camera_details_returns_none_when_no_details(self, sample_class: Camera) -> None:
+        """Test whether the _parse_camera_details function returns None when no details are provided."""
+        sample_class.details = None
+        assert sample_class._parse_camera_details() is None
 
-def test_parse_camera_details_empty_string(sample_class: Camera) -> None:
-    sample_class.details = ""
-    assert sample_class._parse_camera_details() is None
+    def test_parse_camera_details_returns_none_when_empty_string(self, sample_class: Camera) -> None:
+        """Test whether the _parse_camera_details function returns None when an empty string is provided as details."""
+        sample_class.details = ""
+        assert sample_class._parse_camera_details() is None

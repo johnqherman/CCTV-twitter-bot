@@ -54,21 +54,33 @@ def get_random_valid_camera(available_cameras: list[str], camera_constructor) ->
         return camera
 
 
+def replace_substrings(string: str, mappings: dict[str, str]) -> str:
+    """Replaces substrings in a string based on a dictionary of mappings."""
+    for old, new in mappings.items():
+        string = string.replace(old, new)
+    return string
+
+
 def create_tweet_text(camera_info: dict[str, str], flag: str) -> str:
     """Generates a tweet text based on the camera information and flag."""
-    city = camera_info["city"] if camera_info["city"] != "-" else "Unknown"
-    region = camera_info["region"] if camera_info["region"] != "-" else "Unknown"
+    city = camera_info["City"] if camera_info["City"] != "-" else "Unknown"
+    region = camera_info["Region"] if camera_info["Region"] != "-" else "Unknown"
+
+    country_replacements = {
+        ", Province Of": "",
+        ", Republic Of": "",
+        ", Islamic Republic": "",
+        "n Federation": "",
+        "ian, State Of": "e",
+    }
+
     country = (
-        camera_info["country"]
-        .replace(", Province Of", "")
-        .replace(", Republic Of", "")
-        .replace(", Islamic Republic", "")
-        .replace("n Federation", "")
-        .replace("ian, State Of", "e")
-        if camera_info["country"] != "-"
+        replace_substrings(camera_info["Country"], country_replacements)
+        if camera_info["Country"] != "-"
         else "Unknown"
     )
 
+    # location format adjusted for US and Canada; generalized for other countries
     if country == "United States":
         location = f"{city}, {region}"
     elif country == "Canada":
@@ -76,6 +88,7 @@ def create_tweet_text(camera_info: dict[str, str], flag: str) -> str:
     else:
         location = f"{city}, {country}"
 
+    # handle unknown location data
     if city == "Unknown" and region == "Unknown" and country == "United States":
         return f"Unknown, United States {flag}"
     elif location == "Unknown, Unknown":
@@ -91,7 +104,7 @@ def assemble_flag_emoji(country_code: str) -> str:
 
 def post_to_twitter(twitter_api: tweepy.API, tweet_status: str, image_file_path: str) -> bool:
     """
-    Posts a tweet with an image to Twitter.
+    Posts a tweet with the camera image to Twitter.
     Returns True if the post is successful, False otherwise.
     """
     try:
@@ -103,5 +116,5 @@ def post_to_twitter(twitter_api: tweepy.API, tweet_status: str, image_file_path:
         logger.info(f"post successful: {tweet_url}")
         return True
     except tweepy.TweepyException as e:
-        logger.error(f"post failed: {e}")
+        logger.error(f"{type(e).__name__} occurred: {e}")
         return False

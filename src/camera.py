@@ -20,6 +20,11 @@ class Camera:
     """Camera class to handle camera-related operations."""
 
     def __init__(self, url: str):
+        """
+        Initializes the Camera instance by fetching
+        the camera's webpage and parsing it to extract
+        relevant details and stream URLs.
+        """
         self.url = url
         self.id = self._get_camera_id()
         self.page_content = self._get_camera_page(s.REQUEST_HEADERS)
@@ -63,42 +68,27 @@ class Camera:
         )
 
     def _get_camera_details(self) -> Optional[str]:
-        """Extracts the camera details."""
-        details = self.page_tree.xpath('//div[@class="camera-details"]')
-        details_tuple = tuple(detail.text_content() for detail in details)
-        details = "".join(detail.replace("\n", "").replace("\t", "").strip() for detail in details_tuple)
-        return details
+        """Extracts the camera details, including city, region, country, and country code."""
+        camera_details_elements = self.page_tree.xpath('//div[@class="camera-details"]')
+        camera_details_content = tuple(element.text_content() for element in camera_details_elements)
+        camera_details = "".join(
+            content.replace("\n", "").replace("\t", "").strip() for content in camera_details_content
+        )
+        return camera_details if camera_details else None
 
     def _parse_camera_details(self) -> Optional[Dict[str, str]]:
         """Parses the camera details and returns the camera info as a dictionary."""
-
-        if not self.details:
-            return None
-
         details = self.details
+        camera_info = {}
 
-        city_start = details.find("City: ") + len("City: ")
-        city_end = details.find("Latitude:")
-        city = details[city_start:city_end]
-
-        region_start = details.find("Region:") + len("Region:")
-        region_end = details.find("City:")
-        region = details[region_start:region_end]
-
-        country_start = details.find("Country:") + len("Country:")
-        country_end = details.find("Country code:")
-        country = details[country_start:country_end]
-
-        country_code_start = details.find("Country code:") + len("Country code:")
-        country_code_end = details.find("Region:")
-        country_code = details[country_code_start:country_code_end]
-
-        return {
-            "city": city,
-            "region": region,
-            "country": country,
-            "country_code": country_code,
-        }
+        if details is not None:
+            keys = [("City", "Latitude"), ("Region", "City"), ("Country", "Country code"), ("Country code", "Region")]
+            for key, next_key in keys:
+                start = details.find(f"{key}:") + len(f"{key}:")
+                end = details.find(f"{next_key}:")
+                value = details[start:end].strip()
+                camera_info[key] = value
+        return camera_info
 
     @exponential_backoff(
         attempts=s.CAMERA_FETCH_ATTEMPTS,
@@ -122,17 +112,14 @@ class Camera:
     def _image_is_solid_color(self, image_file_path: str) -> bool:
         """Checks if the image consists of a single color."""
         image = cv2.imread(image_file_path)
-
         if image is None:
-            logging.error("image is empty. skipping...")
+            logging.error(f"image is empty: {image_file_path}. skipping...")
             return True
 
         standard_deviation = std(image)
-
         if standard_deviation == 0:
             logging.info("image consists of a single color. skipping...")
             return True
-
         return False
 
     def save_and_validate_image(self, image_file_path: str, request_headers: Dict[str, str]) -> bool:
@@ -141,12 +128,10 @@ class Camera:
         Returns True if the image is saved and validated, False otherwise.
         """
         saved_successfully = self._save_image(image_file_path, self.stream_url, request_headers)
-
-        if saved_successfully:
-            if not self._image_is_solid_color(image_file_path=image_file_path):
-                return True
-            else:
-                os.remove(image_file_path)
-                return False
+        if not saved_successfully:
+            return False
+        if not self._image_is_solid_color(image_file_path=image_file_path):
+            return True
         else:
+            os.remove(image_file_path)
             return False

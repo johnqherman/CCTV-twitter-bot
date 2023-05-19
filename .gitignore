@@ -1,3 +1,4 @@
-credentials.py
-images/
+prod.env
 __pycache__/
+*_cache
+.vscode/

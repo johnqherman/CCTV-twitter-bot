@@ -11,16 +11,16 @@ You can see the bot in action [here on its Twitter page](https://twitter.com/Uns
 1. Clone this repository to your local machine.
 2. Run `pip install -r requirements.txt` to install the necessary dependencies.
 3. Set up a Twitter Developer account and obtain the necessary API credentials. You can find a guide [here](https://developer.twitter.com/en/docs/basics/authentication/guides/access-tokens.html).
-4. Rename the `credentials.py.example` file to `credentials.py` and add your API credentials in the following format:
+4. Rename the `prod.env.example` file to `prod.env` and add your API credentials in the following format:
 
-```python
-CONSUMER_KEY = 'your_consumer_key_here'
-CONSUMER_SECRET = 'your_consumer_secret_here'
-ACCESS_TOKEN = 'your_access_token_here'
-ACCESS_TOKEN_SECRET = 'your_access_token_secret_here'
+```env
+CONSUMER_KEY=YOUR_CONSUMER_KEY
+CONSUMER_SECRET=YOUR_CONSUMER_SECRET
+ACCESS_TOKEN=YOUR_ACCESS_TOKEN
+ACCESS_TOKEN_SECRET=YOUR_ACCESS_TOKEN_SECRET
 ```
 
-5. Launch the bot by running `python twitterbot.py`.
+5. Launch the bot by running `python .\src\main.py`.
 
 ## 🙌 Credits
 

@@ -65,17 +65,8 @@ def create_tweet_text(camera_info: dict[str, str], flag: str) -> str:
     """Generates a tweet text based on the camera information and flag."""
     city = camera_info["City"] if camera_info["City"] != "-" else "Unknown"
     region = camera_info["Region"] if camera_info["Region"] != "-" else "Unknown"
-
-    country_replacements = {
-        ", Province Of": "",
-        ", Republic Of": "",
-        ", Islamic Republic": "",
-        "n Federation": "",
-        "ian, State Of": "e",
-    }
-
     country = (
-        replace_substrings(camera_info["Country"], country_replacements)
+        replace_substrings(camera_info["Country"], c.COUNTRY_REPLACEMENTS)
         if camera_info["Country"] != "-"
         else "Unknown"
     )

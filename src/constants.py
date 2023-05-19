@@ -47,6 +47,14 @@ REGIONAL_INDICATOR_SYMBOLS: Dict[str, str] = {
     "Z": "🇿",
 }
 
+COUNTRY_REPLACEMENTS = {
+    ", Province Of": "",
+    ", Republic Of": "",
+    ", Islamic Republic": "",
+    "n Federation": "",
+    "ian, State Of": "e",
+}
+
 # duration in seconds to wait before posting another tweet
 SLEEP_DURATION: int = 60 * 60
 

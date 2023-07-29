@@ -16,11 +16,22 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def authenticate_twitter() -> tweepy.API:
-    """Authenticates with the Twitter API and returns a tweepy.API instance."""
+def authenticate_twitter() -> Tuple[tweepy.API, tweepy.Client]:
+    """Authenticates with the Twitter v1.1 and 2.0 APIs and returns API/client objects."""
     auth = tweepy.OAuthHandler(c.CONSUMER_KEY, c.CONSUMER_SECRET)
     auth.set_access_token(c.ACCESS_TOKEN, c.ACCESS_TOKEN_SECRET)
-    return tweepy.API(auth)
+
+    api = tweepy.API(auth, wait_on_rate_limit=True)
+    client = tweepy.Client(
+        c.BEARER_TOKEN,
+        c.CONSUMER_KEY,
+        c.CONSUMER_SECRET,
+        c.ACCESS_TOKEN,
+        c.ACCESS_TOKEN_SECRET,
+        wait_on_rate_limit=True,
+    )
+
+    return api, client
 
 
 @exponential_backoff(
@@ -100,10 +111,15 @@ def post_to_twitter(twitter_api: tweepy.API, tweet_status: str, image_file_path:
     """
     try:
         logger.info("posting to twitter...")
-        twitter_api.update_status_with_media(status=tweet_status, filename=image_file_path)
+
+        api, client = authenticate_twitter()
+        media_info = api.media_upload(filename=image_file_path)
+        posted_status_v2 = client.create_tweet(text=tweet_status, media_ids=[media_info.media_id])
+
         bot_username = twitter_api.me().screen_name
-        latest_tweet_id = twitter_api.user_timeline(count=1)[0].id
+        latest_tweet_id = str(posted_status_v2.data["id"])
         tweet_url = f"{c.TWITTER_BASE_URL}{bot_username}/status/{latest_tweet_id}"
+
         logger.info(f"post successful: {tweet_url}")
         return True
     except tweepy.TweepyException as e:

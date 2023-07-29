@@ -10,6 +10,7 @@ CONSUMER_KEY: str = os.getenv("CONSUMER_KEY", "")
 CONSUMER_SECRET: str = os.getenv("CONSUMER_SECRET", "")
 ACCESS_TOKEN: str = os.getenv("ACCESS_TOKEN", "")
 ACCESS_TOKEN_SECRET: str = os.getenv("ACCESS_TOKEN_SECRET", "")
+BEARER_TOKEN: str = os.getenv("BEARER_TOKEN", "")
 
 # template for the image file path with placeholders for variables
 IMG_FILE_PATH_TEMPLATE: str = "{0}{1}_{2}.jpg"
@@ -47,7 +48,8 @@ REGIONAL_INDICATOR_SYMBOLS: Dict[str, str] = {
     "Z": "🇿",
 }
 
-COUNTRY_REPLACEMENTS = {
+# dictionary of mappings to shorten country names
+COUNTRY_REPLACEMENTS: Dict[str, str] = {
     ", Province Of": "",
     ", Republic Of": "",
     ", Islamic Republic": "",

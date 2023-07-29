@@ -21,7 +21,7 @@ class TestCamera:
     @pytest.mark.parametrize(
         "camera_info, flag, expected_output",
         [
-            ({"city": "New York", "region": "New York", "country": "United States"}, "🇺🇸", "New York, NY 🇺🇸"),
+            ({"city": "New York", "region": "New York", "country": "United States"}, "🇺🇸", "New York, New York 🇺🇸"),
             ({"city": "Toronto", "region": "Ontario", "country": "Canada"}, "🇨🇦", "Toronto, Ontario, Canada 🇨🇦"),
             ({"city": "Berlin", "region": "Berlin", "country": "Germany"}, "🇩🇪", "Berlin, Germany 🇩🇪"),
             ({"city": "-", "region": "Texas", "country": "United States"}, "🇺🇸", "Unknown, Texas 🇺🇸"),

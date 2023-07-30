@@ -117,7 +117,7 @@ def post_to_twitter(twitter_api: tweepy.API, tweet_status: str, image_file_path:
         posted_status_v2 = client.create_tweet(text=tweet_status, media_ids=[media_info.media_id])
 
         latest_tweet_id = str(posted_status_v2.data["id"])
-        tweet_url = f"{c.TWITTER_BASE_URL}Unsecured_CCTV/status/{latest_tweet_id}"
+        tweet_url = f"{c.TWITTER_BASE_URL}/Unsecured_CCTV/status/{latest_tweet_id}"
 
         logger.info(f"post successful: {tweet_url}")
         return True

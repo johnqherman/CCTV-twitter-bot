@@ -57,7 +57,7 @@ def get_random_valid_camera(available_cameras: list[str], camera_constructor) ->
     while True:
         random_camera_url = random.choice(available_cameras)
         camera = camera_constructor(random_camera_url)
-        if not camera.page_content or not camera.stream_url or not camera._url_is_valid() or "Korea" in camera.country:
+        if not camera.page_content or not camera.stream_url or not camera._url_is_valid() or "Korea" in camera.details:
             logger.info(f"camera rejected: {camera.id}")
             continue
 

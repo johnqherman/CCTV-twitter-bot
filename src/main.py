@@ -23,7 +23,7 @@ def main() -> None:
     fetches camera links, and posts images with their locations to Twitter.
     """
 
-    authenticate_twitter()
+    twitter_api = authenticate_twitter()
     available_cameras = load_cameras()
 
     while True:
@@ -39,7 +39,9 @@ def main() -> None:
                 camera.info, assemble_flag_emoji(country_code=camera.info["Country code"])
             )
 
-        tweet_posted_successfully = post_to_twitter(tweet_status=tweet_status, image_file_path=image_file_path)
+            tweet_posted_successfully = post_to_twitter(
+                twitter_api=twitter_api, tweet_status=tweet_status, image_file_path=image_file_path
+            )
 
         if tweet_posted_successfully:
             logger.info("waiting for an hour...")

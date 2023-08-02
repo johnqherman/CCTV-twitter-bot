@@ -104,7 +104,7 @@ def assemble_flag_emoji(country_code: str) -> str:
     return "".join(c.REGIONAL_INDICATOR_SYMBOLS.get(char, char) for char in country_code)
 
 
-def post_to_twitter(tweet_status: str, image_file_path: str) -> bool:
+def post_to_twitter(twitter_api: tweepy.API, tweet_status: str, image_file_path: str) -> bool:
     """
     Posts a tweet with the camera image to Twitter.
     Returns True if the post is successful, False otherwise.

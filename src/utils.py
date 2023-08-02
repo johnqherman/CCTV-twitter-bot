@@ -57,7 +57,7 @@ def get_random_valid_camera(available_cameras: list[str], camera_constructor) ->
     while True:
         random_camera_url = random.choice(available_cameras)
         camera = camera_constructor(random_camera_url)
-        if not camera.page_content or not camera.stream_url or not camera._url_is_valid():
+        if not camera.page_content or not camera.stream_url or not camera._url_is_valid() or "Korea" in camera.country:
             logger.info(f"camera rejected: {camera.id}")
             continue
 
@@ -104,7 +104,7 @@ def assemble_flag_emoji(country_code: str) -> str:
     return "".join(c.REGIONAL_INDICATOR_SYMBOLS.get(char, char) for char in country_code)
 
 
-def post_to_twitter(twitter_api: tweepy.API, tweet_status: str, image_file_path: str) -> bool:
+def post_to_twitter(tweet_status: str, image_file_path: str) -> bool:
     """
     Posts a tweet with the camera image to Twitter.
     Returns True if the post is successful, False otherwise.

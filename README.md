@@ -25,4 +25,4 @@ BEARER_TOKEN=YOUR_BEARER_TOKEN
 
 ## 🙌 Credits
 
-This project was developed by John Q. Herman [(sharkobarko)](https://twitter.com/sharkobarko) under the [MIT](https://choosealicense.com/licenses/mit/) license, with camera feeds sourced from [Insecam.org](http://www.insecam.org/static/sitemap.xml).
+This project was developed by John Q. Herman under the [MIT](https://choosealicense.com/licenses/mit/) license, with camera feeds sourced from [Insecam.org](http://www.insecam.org/static/sitemap.xml).

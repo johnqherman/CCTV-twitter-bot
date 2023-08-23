@@ -8,7 +8,10 @@ logger = logging.getLogger(__name__)
 
 
 def exponential_backoff(
-    attempts: int, initial_delay: int, factor: int, exception_types: Tuple[Type[Exception], ...]
+    attempts: int,
+    initial_delay: int,
+    factor: int,
+    exception_types: Tuple[Type[Exception], ...],
 ) -> Callable:
     """
     Decorator to retry a function with exponential backoff on specified exceptions.

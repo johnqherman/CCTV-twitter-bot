@@ -36,11 +36,14 @@ def main() -> None:
 
         if camera.info is not None:
             tweet_status = create_tweet_text(
-                camera.info, assemble_flag_emoji(country_code=camera.info["Country code"])
+                camera.info,
+                assemble_flag_emoji(country_code=camera.info["Country code"]),
             )
 
             tweet_posted_successfully = post_to_twitter(
-                twitter_api=twitter_api, tweet_status=tweet_status, image_file_path=image_file_path
+                twitter_api=twitter_api,
+                tweet_status=tweet_status,
+                image_file_path=image_file_path,
             )
 
         if tweet_posted_successfully:

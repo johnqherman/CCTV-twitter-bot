@@ -82,7 +82,12 @@ class Camera:
         camera_info = {}
 
         if details is not None:
-            keys = [("City", "Latitude"), ("Region", "City"), ("Country", "Country code"), ("Country code", "Region")]
+            keys = [
+                ("City", "Latitude"),
+                ("Region", "City"),
+                ("Country", "Country code"),
+                ("Country code", "Region"),
+            ]
             for key, next_key in keys:
                 start = details.find(f"{key}:") + len(f"{key}:")
                 end = details.find(f"{next_key}:")

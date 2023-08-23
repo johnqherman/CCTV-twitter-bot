@@ -21,13 +21,37 @@ class TestCamera:
     @pytest.mark.parametrize(
         "camera_info, flag, expected_output",
         [
-            ({"city": "New York", "region": "New York", "country": "United States"}, "🇺🇸", "New York, New York 🇺🇸"),
-            ({"city": "Toronto", "region": "Ontario", "country": "Canada"}, "🇨🇦", "Toronto, Ontario, Canada 🇨🇦"),
-            ({"city": "Berlin", "region": "Berlin", "country": "Germany"}, "🇩🇪", "Berlin, Germany 🇩🇪"),
-            ({"city": "-", "region": "Texas", "country": "United States"}, "🇺🇸", "Unknown, Texas 🇺🇸"),
-            ({"city": "Unknown", "region": "Unknown", "country": "United States"}, "🇺🇸", "Unknown, United States 🇺🇸"),
+            (
+                {"city": "New York", "region": "New York", "country": "United States"},
+                "🇺🇸",
+                "New York, New York 🇺🇸",
+            ),
+            (
+                {"city": "Toronto", "region": "Ontario", "country": "Canada"},
+                "🇨🇦",
+                "Toronto, Ontario, Canada 🇨🇦",
+            ),
+            (
+                {"city": "Berlin", "region": "Berlin", "country": "Germany"},
+                "🇩🇪",
+                "Berlin, Germany 🇩🇪",
+            ),
+            (
+                {"city": "-", "region": "Texas", "country": "United States"},
+                "🇺🇸",
+                "Unknown, Texas 🇺🇸",
+            ),
+            (
+                {"city": "Unknown", "region": "Unknown", "country": "United States"},
+                "🇺🇸",
+                "Unknown, United States 🇺🇸",
+            ),
             ({"city": "-", "region": "-", "country": "-"}, "", "Unknown Location"),
-            ({"city": "Unknown", "region": "Unknown", "country": "Canada"}, "🇨🇦", "Unknown Location"),
+            (
+                {"city": "Unknown", "region": "Unknown", "country": "Canada"},
+                "🇨🇦",
+                "Unknown Location",
+            ),
         ],
     )
     def test_create_tweet_text_formats_correctly(self, camera_info, flag, expected_output):
@@ -58,13 +82,41 @@ class TestCamera:
     @pytest.mark.parametrize(
         "details, expected_output",
         [
-            (DETAILS_JAPAN, {"city": " Tanabe", "region": "Wakayama", "country": "Japan", "country_code": "JP"}),
-            (DETAILS_GERMANY, {"city": " Deggendorf", "region": "Bayern", "country": "Germany", "country_code": "DE"}),
-            (DETAILS_TURKEY, {"city": " Ankara", "region": "Ankara", "country": "Turkey", "country_code": "TR"}),
+            (
+                DETAILS_JAPAN,
+                {
+                    "city": " Tanabe",
+                    "region": "Wakayama",
+                    "country": "Japan",
+                    "country_code": "JP",
+                },
+            ),
+            (
+                DETAILS_GERMANY,
+                {
+                    "city": " Deggendorf",
+                    "region": "Bayern",
+                    "country": "Germany",
+                    "country_code": "DE",
+                },
+            ),
+            (
+                DETAILS_TURKEY,
+                {
+                    "city": " Ankara",
+                    "region": "Ankara",
+                    "country": "Turkey",
+                    "country_code": "TR",
+                },
+            ),
         ],
     )
     def test_parse_camera_details_returns_correct_output(
-        self, mocker, sample_class: Camera, details: str, expected_output: Dict[str, str]
+        self,
+        mocker,
+        sample_class: Camera,
+        details: str,
+        expected_output: Dict[str, str],
     ) -> None:
         """Test whether the _parse_camera_details function returns the correct output."""
         sample_class.details = details

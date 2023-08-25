@@ -2,3 +2,4 @@ prod.env
 __pycache__/
 *_cache
 .vscode/
+src/sitemap.xml

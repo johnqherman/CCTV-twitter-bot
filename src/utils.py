@@ -2,7 +2,6 @@ import logging
 import random
 from typing import Tuple
 
-import requests  # type: ignore
 import tweepy
 from lxml import etree
 
@@ -42,14 +41,19 @@ def authenticate_twitter() -> Tuple[tweepy.API, tweepy.Client]:
 )
 def load_cameras() -> Tuple[str, ...]:
     """Fetches the camera links and returns them as a tuple."""
-    r = requests.get(c.SITEMAP_URL)
-    r.raise_for_status()
+    try:
+        with open("sitemap.xml", "r", encoding="utf-8") as f:
+            xml_content = f.read()
 
-    loc_elements = tuple(link for link in etree.fromstring(r.content).iter("{*}loc"))
-    camera_links = tuple(link.text for link in loc_elements)
+        # parse xml content and extract camera links
+        loc_elements = tuple(link for link in etree.fromstring(xml_content.encode("utf-8")).iter("{*}loc"))
+        camera_links = tuple(link.text for link in loc_elements)
 
-    logger.info(f"fetched {len(camera_links)} camera links.")
-    return camera_links
+        logger.info(f"fetched {len(camera_links)} camera links.")
+        return camera_links
+
+    except Exception as e:
+        raise FetchCamerasException(f"failed to load cameras: {e}")
 
 
 def get_random_valid_camera(available_cameras: list[str], camera_constructor) -> Camera:

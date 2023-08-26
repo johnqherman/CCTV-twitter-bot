@@ -25,4 +25,4 @@ BEARER_TOKEN=YOUR_BEARER_TOKEN
 
 ## 🙌 Credits
 
-This project was developed by John Q. Herman under the [MIT](https://choosealicense.com/licenses/mit/) license. The camera feeds were originally sourced from [Insecam.org](http://www.insecam.org/static/sitemap.xml). As of writing, the official sitemap is returning a 404 error. However, the project has been adapted to use a local version of the sitemap, which is not included in this repository.
+This project was developed by John Q. Herman under the [MIT](https://choosealicense.com/licenses/mit/) license, with camera feeds sourced from [Insecam.org](http://www.insecam.org/static/sitemap.xml).

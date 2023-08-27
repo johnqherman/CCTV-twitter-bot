@@ -1,15 +1,16 @@
 import logging
 import random
-from typing import Tuple
+from typing import Optional, Tuple, Type
 
 import requests  # type: ignore
 import tweepy
 from lxml import etree
+from requests.exceptions import RequestException  # type: ignore
 
 import constants as c
 import settings as s
 from camera import Camera
-from exceptions import FetchCamerasException, SaveImageException
+from exceptions import FetchCamerasException
 from shared import exponential_backoff
 
 logging.basicConfig(level=logging.INFO)
@@ -38,31 +39,52 @@ def authenticate_twitter() -> Tuple[tweepy.API, tweepy.Client]:
     attempts=s.CAMERA_FETCH_ATTEMPTS,
     initial_delay=s.INITIAL_RETRY_DELAY,
     factor=s.RETRY_DELAY_FACTOR,
-    exception_types=(FetchCamerasException, SaveImageException),
+    exception_types=(FetchCamerasException, RequestException),
 )
 def load_cameras() -> Tuple[str, ...]:
     """Fetches the camera links and returns them as a tuple."""
-    r = requests.get(c.SITEMAP_URL)
-    r.raise_for_status()
+    try:
+        r = requests.get(c.SITEMAP_URL)
+        r.raise_for_status()
 
-    loc_elements = tuple(link for link in etree.fromstring(r.content).iter("{*}loc"))
-    camera_links = tuple(link.text for link in loc_elements)
+        loc_elements = tuple(link for link in etree.fromstring(r.content).iter("{*}loc"))
+        camera_links = tuple(link.text for link in loc_elements)
 
-    logger.info(f"fetched {len(camera_links)} camera links.")
-    return camera_links
+        logger.info(f"fetched {len(camera_links)} camera links.")
+        return camera_links
+    except RequestException as e:
+        logger.error(f"{type(e).__name__} occurred: {e}")
+        raise FetchCamerasException
 
 
-def get_random_valid_camera(available_cameras: list[str], camera_constructor) -> Camera:
+def get_random_valid_camera(available_cameras: list[str], camera_constructor: Type[Camera], browser) -> Camera:
     """Returns a random valid Camera object."""
+
+    def camera_is_valid(camera: Camera) -> Tuple[bool, Optional[str]]:
+        if not camera.page_content:
+            return False, "missing page content"
+        if not camera.stream_url:
+            return False, "missing stream URL"
+        if not camera._url_is_valid():
+            return False, "invalid URL"
+        if camera.details is not None:
+            banned_country = next((country for country in s.BANNED_COUNTRIES if country in camera.details), None)
+            if banned_country:
+                return False, f"located in {banned_country}"
+        return True, None
+
     while True:
         random_camera_url = random.choice(available_cameras)
-        camera = camera_constructor(random_camera_url)
-        if not camera.page_content or not camera.stream_url or not camera._url_is_valid() or "Korea" in camera.details:
-            logger.info(f"camera rejected: {camera.id}")
-            continue
+        camera = camera_constructor(random_camera_url, browser)
 
-        logger.info(f"camera accepted: {camera.id}")
-        return camera
+        is_valid, reason = camera_is_valid(camera)
+
+        if is_valid:
+            logger.info(f"camera accepted: {camera.id}")
+            print(f"attempting to load camera: {camera.stream_url}")
+            return camera
+        else:
+            logger.info(f"camera rejected: {camera.id}: {reason}")
 
 
 def replace_substrings(string: str, mappings: dict[str, str]) -> str:

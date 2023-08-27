@@ -2,7 +2,7 @@ import logging
 import time
 
 import constants as c
-import settings as s
+from browser import initialize_browser
 from camera import Camera
 from utils import (
     assemble_flag_emoji,
@@ -23,15 +23,18 @@ def main() -> None:
     fetches camera links, and posts images with their locations to Twitter.
     """
 
+    browser = initialize_browser()
     twitter_api = authenticate_twitter()
     available_cameras = load_cameras()
 
     while True:
-        camera = get_random_valid_camera(available_cameras=available_cameras, camera_constructor=Camera)
+        camera = get_random_valid_camera(
+            available_cameras=available_cameras, camera_constructor=Camera, browser=browser
+        )
 
         image_file_path = c.IMG_FILE_PATH_TEMPLATE.format(c.IMG_ROOT, camera.id, int(time.time()))
 
-        if not camera.save_and_validate_image(image_file_path=image_file_path, request_headers=s.REQUEST_HEADERS):
+        if not camera.save_and_validate_image(image_file_path=image_file_path):
             continue
 
         if camera.info is not None:

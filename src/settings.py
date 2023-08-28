@@ -17,5 +17,11 @@ INITIAL_RETRY_DELAY: int = 1
 # after each retry, the delay is multiplied by this factor
 RETRY_DELAY_FACTOR: int = 2
 
-# amount of time to wait for a response from the camera, in seconds
-IMAGE_SAVE_TIMEOUT: int = 10
+# amount of time to wait before the selenium driver times out, in seconds
+BROWSER_TIMEOUT: int = 30
+
+# amount of time to wait for the camera stream to load, in seconds
+CAMERA_LOAD_TIMEOUT: int = 5
+
+# banned countries to exclude from the camera pool (just Korea for now)
+BANNED_COUNTRIES: tuple = ("Korea",)

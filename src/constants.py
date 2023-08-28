@@ -13,7 +13,7 @@ ACCESS_TOKEN_SECRET: str = os.getenv("ACCESS_TOKEN_SECRET", "")
 BEARER_TOKEN: str = os.getenv("BEARER_TOKEN", "")
 
 # template for the image file path with placeholders for variables
-IMG_FILE_PATH_TEMPLATE: str = "{0}{1}_{2}.jpg"
+IMG_FILE_PATH_TEMPLATE: str = "{0}{1}_{2}.png"
 
 # the root directory where images will be stored
 IMG_ROOT: str = "../images/"
